@@ -1,0 +1,28 @@
+# Build artifacts
+build/
+bin/
+*.o
+*.a
+*.so
+*.exe
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Results (données de test, pas le code)
+results/test_data/*
+results/logs/*
+results/graphs/*.png
+!results/**/.gitkeep
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# OS
+.DS_Store
+Thumbs.db
