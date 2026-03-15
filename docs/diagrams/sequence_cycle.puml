@@ -1,0 +1,78 @@
+@startuml sequence_cycle
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam sequenceMessageAlign center
+
+title Diagramme de séquence — Cycle normal d'acquisition et d'alerte\nIFT729 — Carlos Tsambou Jiofack (TSAC1701)
+
+participant "Acquisition\n(Thread P1)" as ACQ #LightBlue
+participant "Analyse\n(Thread P2)" as ANA #LightGreen
+participant "Alerte\n(Thread P3)" as ALE #LightCoral
+participant "Diagnostic\n(Thread P4)" as DIAG #LightYellow
+
+== Initialisation ==
+ACQ  -> ACQ  : Démarrage (t=0)
+ANA  -> ANA  : wait(condition_variable)
+ALE  -> ALE  : wait(condition_variable)
+DIAG -> DIAG : wait(log_queue)
+
+== Cycle d'acquisition (toutes les 50 ms) ==
+
+ACQ  -> ACQ  : sleep_until(t + 50ms)
+ACQ  -> ACQ  : simulate_sensor_delay(10ms) [ECG]
+ACQ  -> ACQ  : lire FC, SpO2, Température
+ACQ  -> ACQ  : valider plages physiologiques
+
+alt Capteur valide
+    ACQ -> ANA : mutex.lock() + SensorData + notify_one()
+else Panne capteur (2%)
+    ACQ -> DIAG : log_queue.push("PANNE_CAPTEUR")
+    ACQ -> ANA  : SensorData (hr_valid=false) + notify_one()
+end
+
+== Traitement Analyse (deadline : 20 ms) ==
+
+ANA  -> ANA  : ScopedTimer démarré
+ANA  -> ANA  : évaluer seuils cliniques
+
+alt Anomalie détectée
+    ANA -> ALE  : AlertData + notify_one()
+    note right : type, level, valeur,\ndetection_time
+else Aucune anomalie
+    ANA -> ALE  : AlertData(NONE) + notify_one()
+end
+
+ANA  -> ANA  : ScopedTimer arrêté\nenregistrer analyse_ms
+
+== Notification Alerte (deadline : 100 ms depuis détection) ==
+
+ALE  -> ALE  : ScopedTimer démarré
+ALE  -> ALE  : ignorer si AlertType::NONE
+
+alt Type != NONE
+    ALE  -> ALE  : send_primary_notification()
+
+    alt Signalement réussi
+        ALE  -> ALE  : afficher notification console
+    else Échec (5%)
+        loop retry × 3
+            ALE  -> ALE  : nouvelle tentative
+        end
+        alt Toujours en échec
+            ALE  -> DIAG : log_queue.push("[BACKUP_NOTIF]")
+        else Échec total
+            ALE  -> DIAG : log_queue.push("[DEGRADED]")
+        end
+    end
+
+    ALE  -> ALE  : mesurer latence E2E\n(detection_time → now)
+    ALE  -> DIAG : log_queue.push(résultat)
+end
+
+== Journalisation asynchrone ==
+
+DIAG -> DIAG : consommer log_queue
+DIAG -> DIAG : écrire dans diagnostic.log
+
+@enduml

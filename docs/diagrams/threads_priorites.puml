@@ -1,0 +1,38 @@
+@startuml threads_priorites
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+
+title Gestion des threads et priorités SCHED_FIFO\nIFT729 — Carlos Tsambou Jiofack (TSAC1701)
+
+(*) --> "main()\nLancement des threads"
+
+"main()\nLancement des threads" --> "Thread T1\nAcquisition\nSCHED_FIFO prio=80" #LightBlue
+"main()\nLancement des threads" --> "Thread T2\nAnalyse\nSCHED_FIFO prio=70" #LightGreen
+"main()\nLancement des threads" --> "Thread T3\nAlerte\nSCHED_FIFO prio=60" #LightCoral
+"main()\nLancement des threads" --> "Thread T4\nDiagnostic\nprio défaut" #LightYellow
+
+"Thread T1\nAcquisition\nSCHED_FIFO prio=80" --> "Boucle 50 ms\nprecise_sleep_until()"
+"Boucle 50 ms\nprecise_sleep_until()" --> "Boucle 50 ms\nprecise_sleep_until()" : g_running == true
+"Boucle 50 ms\nprecise_sleep_until()" --> "T1 rejoint" : g_running == false
+
+"Thread T2\nAnalyse\nSCHED_FIFO prio=70" --> "cv.wait(data_ready)"
+"cv.wait(data_ready)" --> "cv.wait(data_ready)" : g_running == true
+"cv.wait(data_ready)" --> "T2 rejoint" : g_running == false
+
+"Thread T3\nAlerte\nSCHED_FIFO prio=60" --> "cv.wait(alert_ready)"
+"cv.wait(alert_ready)" --> "cv.wait(alert_ready)" : g_running == true
+"cv.wait(alert_ready)" --> "T3 rejoint" : g_running == false
+
+"Thread T4\nDiagnostic\nprio défaut" --> "cv.wait_for(100ms)"
+"cv.wait_for(100ms)" --> "cv.wait_for(100ms)" : g_running == true
+"cv.wait_for(100ms)" --> "T4 rejoint" : g_running == false
+
+"T1 rejoint" --> "Rapport final\nprint_performance_report()"
+"T2 rejoint" --> "Rapport final\nprint_performance_report()"
+"T3 rejoint" --> "Rapport final\nprint_performance_report()"
+"T4 rejoint" --> "Rapport final\nprint_performance_report()"
+
+"Rapport final\nprint_performance_report()" --> (*)
+
+@enduml

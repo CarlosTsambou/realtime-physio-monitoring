@@ -1,0 +1,45 @@
+@startuml architecture_composants
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle rectangle
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+
+title Système TR de surveillance physiologique — Architecture des composants\nIFT729 — Carlos Tsambou Jiofack (TSAC1701)
+
+package "Système temps réel" {
+
+    component [Acquisition\n──────────\nPriorité 1\nPériode : 50 ms\nContrainte stricte] as ACQ #LightBlue
+    component [Analyse\n──────────\nPriorité 2\nDeadline : 20 ms\nContrainte stricte] as ANA #LightGreen
+    component [Alerte\n──────────\nPriorité 3\nDeadline : 100 ms\nContrainte stricte] as ALE #LightCoral
+    component [Diagnostic\n──────────\nPriorité 4\nHors chemin critique\nContrainte souple] as DIAG #LightYellow
+
+    database "SensorData\n(partagé)" as SD
+    database "AlertData\n(partagé)" as AD
+    queue    "LogQueue\n(file FIFO)" as LQ
+}
+
+ACQ --> SD       : écrit\n[mutex]
+SD  --> ANA      : lit\n[condition_variable]
+ANA --> AD       : écrit\n[mutex]
+AD  --> ALE      : lit\n[condition_variable]
+ALE --> LQ       : push log
+ACQ --> LQ       : push panne
+DIAG <-- LQ      : consomme\n[asynchrone]
+
+note right of ACQ
+  Capteurs simulés :
+  • FC / ECG     (10 ms délai)
+  • SpO2         (1.5 s réponse)
+  • Température  (2 s réponse)
+  • Panne : 2% / cycle
+end note
+
+note right of ALE
+  Résilience :
+  1. Notification primaire
+  2. Retry × 3 si échec
+  3. Canal de secours
+  4. Mode dégradé
+end note
+
+@enduml
