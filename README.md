@@ -1,13 +1,7 @@
-# 🏥 Real-Time Physiological Monitoring System
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Language: C++17](https://img.shields.io/badge/Language-C%2B%2B17-blue.svg)]()
-[![Platform: Linux](https://img.shields.io/badge/Platform-Linux-lightgrey.svg)]()
 
 > A high-performance real-time physiological monitoring system with strict temporal constraints.
 
 **Academic Project** | IFT729 - Real-Time Systems Design | Winter 2026  
-**Author:** Carlos Tsambou Jiofack
 
 ---
 
@@ -60,15 +54,12 @@ sudo ./bin/test_acquisition 60
 
 ##  Project Status
 
-**Current Phase:** Setup and Infrastructure  
-**Next Milestone:** L01 - Functional System
-
 - [x] Environment setup
 - [x] Project structure
-- [ ] Acquisition module
-- [ ] Analysis module
-- [ ] Alert module
-- [ ] Performance validation
+- [x] Acquisition module
+-  [x]  Analysis module
+-  [x]  Alert module
+-  [x]  Performance validation
 
 ---
 
@@ -85,13 +76,3 @@ sudo ./bin/test_acquisition 60
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
-
-##  Author
-
-**Carlos Tsambou Jiofack**
-- Email: carlostsambou@outlook.fr
-- GitHub: [@CarlosTsambou](https://github.com/CarlosTsambou)
-
----
-
-**⭐ Star this repo if you find it interesting!**
